@@ -23,17 +23,11 @@ create table customers (
     
 );
 
+-- Describing table :   
 desc customers ;
 
 
--- Alter table :
-
--- Add Primary key
-alter table customers add constraint primary key ( ID );
-
-desc customers ;
-
-   
+-- Alter table :   
 -- Add a new columns
 
 alter table customers add column employer varchar(32) ;
@@ -46,6 +40,9 @@ desc customers ;
 
 alter table customers drop column employer ;
 desc customers ;
+
+-- Truncate table
+truncate table customers ;
 
 -- Dropping table
 drop table customers ;
