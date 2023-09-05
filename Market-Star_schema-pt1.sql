@@ -131,3 +131,50 @@ select * from cust_dimen where customer_segment != 'small business';
 
 -- List the orders with '_5' in their order ids and shipping costs between 10 and 15.
 select ord_id, shipping_cost from market_fact_full where ord_id like '%\_5%' and shipping_cost between 10 and 15 ;
+
+-- Aggregate Functions Day 3
+
+-- 1. Find the total number of sales made.
+select count(sales) from market_fact_full;
+
+-- 2. What are the total numbers of customers from each city?
+select count(customer_name), city from cust_dimen group by city ;
+
+-- 3. Find the number of orders which have been sold at a loss.
+select count(ord_id) from market_fact_full where profit < 0 ;
+
+-- 4. Find the total number of customers from Bihar in each segment.
+select count(customer_name), Customer_Segment
+from cust_dimen where state = 'Bihar' group by Customer_Segment, state ;
+
+
+-- 5. Find the customers who incurred a shipping cost of more than 50.
+select cust_id, sum(shipping_cost) from market_fact_full group by cust_id having sum(shipping_cost)  > 50;
+--     WHere vs have
+     
+     /*
+        
+        We will be covering ordering in SQL 
+     
+     */
+     
+     
+--  List the customer names in alphabetical order.
+-- select  count(distinct customer_name) from cust_dimen order by customer_name  ;
+-- select count(customer_name), customer_name from cust_dimen group by customer_name order by customer_name  ;
+select  distinct customer_name from cust_dimen order by customer_name  ;
+
+-- Print the three most ordered products.
+select prod_id, sum(order_quantity) from market_fact_full group by prod_id order by sum(order_quantity) desc limit 3;
+
+--  Print the three least ordered products.
+select prod_id, sum(order_quantity) from market_fact_full group by prod_id order by sum(order_quantity) limit 3;
+
+--  Arrange the order ids in the order of their recency.
+select ord_id, order_date  from orders_dimen order by order_date desc ;
+
+--  On which date most orders were placed?
+select count(ord_id), order_date from orders_dimen group by order_date order by count(ord_id) desc limit 1;
+
+--  Arrange all consumers from Coimbatore in alphabetical order.
+select Customer_Name from cust_dimen where city = "Coimbatore" and Customer_Segment = "Consumer" order by Customer_Name ;
