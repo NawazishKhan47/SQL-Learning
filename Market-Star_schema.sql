@@ -178,3 +178,97 @@ select count(ord_id), order_date from orders_dimen group by order_date order by 
 
 --  Arrange all consumers from Coimbatore in alphabetical order.
 select Customer_Name from cust_dimen where city = "Coimbatore" and Customer_Segment = "Consumer" order by Customer_Name ;
+
+
+
+
+/*
+
+ In-built functions - String and date-time functions
+ 
+*/
+select Customer_name from cust_dimen ;
+select concat(upper(substring(lower(substring_index(Customer_name, ' ', 1)), 1, 1)),
+substring(substring_index(lower(customer_name), ' ' , 1), 2, 100), ' ',
+upper(substring(lower(substring_index(Customer_name, ' ', -2)), 1, 1)),
+substring(substring_index(lower(customer_name), ' ' , -2), 2, 100), ' ',
+upper(substring(lower(substring_index(Customer_name, ' ', -1)), 1, 1)),
+substring(substring_index(lower(customer_name), ' ' , -1), 2, 100)) from cust_dimen;
+
+
+
+
+-- Print the customer names in proper case.
+select Customer_Name, concat(upper(substring(substring_index(lower(customer_name), ' ', 1), 1, 1)),
+	substring(substring_index(lower(customer_name), ' ' , 1), 2, 20), ' ',
+	upper(substring(substring_index(lower(customer_name), ' ', -1), 1, 1)),
+    substring(substring_index(lower(customer_name), ' ', -1), 2, 20)) as Customer_Name_Proper_Case
+from cust_dimen;
+
+
+-- Print the product names in the following format: Category_Subcategory.
+select concat(product_category, '_', product_sub_category) from prod_dimen;
+
+-- Replace all the spaces with underscore.
+select replace(concat(product_category, '_', product_sub_category), ' ', '_') from prod_dimen;
+
+-- In which month were the most orders shipped?
+select count(ship_id), month(ship_date) from shipping_dimen group by month(Ship_Date) order by count(ship_id) ;
+select month(ship_date), ship_date from shipping_dimen;
+
+-- Which month and year combination saw the most number of critical orders?
+select count(ord_id), month(order_date), Year(order_date)
+from orders_dimen
+Where order_priority = 'Critical'
+group by month(order_date), Year(order_date)
+order by count(ord_id)
+desc;
+
+-- Find the most commonly used mode of shipment in 2011.
+select count(ship_mode), ship_mode from shipping_dimen
+where year(ship_date) =
+'2011' group by ship_mode ;
+
+
+-- 1. Print the order number of the most valuable order by sales.
+select max(round(sales)), ord_id from market_fact_full group by ord_id order by max(sales) desc;
+
+-- 2. Print the name of the most frequent customer.
+select customer_name, cust_id from
+cust_dimen
+where cust_id =
+(select cust_id from market_fact_full
+group by cust_id
+order by count(cust_id)
+desc limit 1);
+
+
+
+-- 3. Print the three most common products.
+select prod_id, Product_Category,
+Product_Sub_Category from
+prod_dimen where prod_id in (select
+prod_id from market_fact_full GROUP By
+prod_id order by count(Prod_id) desc)
+limit 3;
+     
+
+
+-- -----------------------------------------------------------------------------------------------------------------
+-- Views
+
+-- 1. Create a view to display the sales amounts, the number of orders, profits made and the shipping costs of all
+-- orders. Query it to return all orders which have a profit of greater than 1000.
+
+create view ord_detail as select ord_id, round(sales), order_quantity, profit, shipping_cost from market_fact_full;
+select * from ord_detail;
+select ord_id, profit from ord_detail where profit > 1000 ;
+
+-- 2. Which year generated the highest profit?
+
+select year(order_date) from orders_dimen where
+ord_id in (select ord_id from market_fact_full group by ord_id order by sum(profit) desc) limit 1;
+
+
+
+
