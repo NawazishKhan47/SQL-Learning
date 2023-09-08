@@ -271,4 +271,62 @@ ord_id in (select ord_id from market_fact_full group by ord_id order by sum(prof
 
 
 
+-- JOINS
+
+-- 1. Print the product categories and subcategories along with the profits made for each order.
+select product_category, product_sub_category, profit from prod_dimen p 
+inner join market_fact_full m on p.Prod_id = m.Prod_id ;
+
+
+-- 2. Find the shipment date, mode and profit made for every single order.
+select ord_id, ship_date, ship_mode, profit from market_fact_full m inner join shipping_dimen s on m.Ship_id = s.Ship_id;
+
+-- 3. Print the shipment mode, profit made and product category for each product.
+select p.prod_id, ship_mode, profit, product_category from 
+prod_dimen p inner join market_fact_full m on m.prod_id = p.prod_id
+inner join shipping_dimen s on m.ship_id = s.ship_id ;
+
+-- 4. Which customer ordered the most number of products?
+ select c.cust_id , customer_name, count(prod_id) from market_fact_full m  inner join cust_dimen c on m.Cust_id = c.Cust_id
+ group by c.Cust_id order by count(prod_id) desc limit 1 ;
+
+-- 5. Selling office supplies was more profitable in Delhi as compared to Patna. True or false?
+select profit, city from market_fact_full m inner join prod_dimen p on m.Prod_id = p.Prod_id 
+inner join cust_dimen c on c.Cust_id = m.Cust_id where Product_Category = 'Office SUpplies' and city in ('Delhi', 'Patna');
+
+-- 6. Print the three most common products.
+select product_sub_category, sum(order_quantity) from market_fact_full m inner join prod_dimen p on m.Prod_id = p.Prod_id
+group by Product_Sub_Category order by sum(order_quantity) desc limit 3; 
+
+
+-- 7 . View and joins together : Which year generated the highest profit?
+ create view profit_year as select sum(profit), year(order_date) from market_fact_full m inner join orders_dimen o on m.Ord_id = o.Ord_id
+ group by year(Order_date) order by sum(profit) desc ;
+
+select * from profit_year;
+
+
+
+
+-- Outer Join
+-- 1. Return the order ids which are present in the market facts table.
+select m.ord_id from orders_dimen o right join market_fact_full m on m.Ord_id = o.Ord_id;
+
+
+-- UNION
+-- 1. Combine the order numbers for orders and order ids for all shipments in a single column.
+ (select ord_id from orders_dimen)
+ union all
+ (select Order_Number from shipping_dimen);
+
+
+
+
+-- 2. What are the two most and the two least profitable products?
+(select sum(profit), prod_id from market_fact_full group by prod_id order by sum(profit) desc limit 2) union (select sum(profit), prod_id from market_fact_full group by prod_id order by sum(profit) asc limit 2) ;
+
+
+
+
+
 
